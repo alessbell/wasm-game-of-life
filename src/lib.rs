@@ -13,6 +13,15 @@ pub enum Cell {
     Alive = 1,
 }
 
+impl Cell {
+    fn toggle(&mut self) {
+        *self = match *self {
+            Cell::Dead => Cell::Alive,
+            Cell::Alive => Cell::Dead,
+        }
+    }
+}
+
 #[wasm_bindgen]
 pub struct Universe {
     width: u32,
@@ -27,6 +36,10 @@ impl Universe {
     }
     pub fn height(&self) -> u32 {
         self.height
+    }
+    pub fn toggle_cell(&mut self, row: u32, column: u32) {
+        let idx = self.get_index(row, column);
+        self.cells[idx].toggle();
     }
     pub fn new() -> Universe {
         let width = 100;
@@ -48,9 +61,8 @@ impl Universe {
             cells,
         }
     }
-    // To do: what is this code doing?
     pub fn cells(&self) -> *const Cell {
-        self.cells.as_ptr() // as pointer?
+        self.cells.as_ptr()
     }
     fn get_index(&self, row: u32, column: u32) -> usize {
         (row * self.width + column) as usize
@@ -85,6 +97,7 @@ impl Universe {
                     (Cell::Alive, x) if x < 2 => Cell::Dead,
                     (Cell::Alive, 2) | (Cell::Alive, 3) => Cell::Alive,
                     (Cell::Alive, x) if x > 3 => Cell::Dead,
+                    (Cell::Dead, 3) => Cell::Alive,
                     (otherwise, _) => otherwise,
                 };
 
